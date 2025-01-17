@@ -1,6 +1,8 @@
 package graphs
 
-import "math"
+import (
+	"math"
+)
 
 // CREATING A PAIR STRUCTURE TO USE WHEN NEEDING PAIRS
 type pair struct {
@@ -414,4 +416,162 @@ func isBipartiteBFS(V int, adj [][]int) bool {
 		}
 	}
 	return true
+}
+
+// DIJKSTRA ALGORITHM
+func dijkstra(V int, adj [][][]int, SRC int) []int {
+	distance := make([]int, V)
+	visited := make([]bool, V)
+	for i := 0; i < V; i++ {
+		distance[i] = math.MaxInt32
+		visited[i] = false
+	}
+	distance[SRC] = 0
+	for i := 0; i < V-1; i++ {
+		node := -1
+		value := math.MaxInt
+		for j := 0; j < V; j++ {
+			if visited[j] == false && distance[j] < value {
+				node = j
+				value = distance[j]
+			}
+		}
+		if node == -1 {
+			break
+		}
+		visited[node] = true
+		n := len(adj[node])
+		for j := 0; j < n; j++ {
+			neighbor := adj[node][j][0]
+			weight := adj[node][j][1]
+
+			if distance[neighbor] > distance[node]+weight {
+				distance[neighbor] = distance[node] + weight
+			}
+		}
+
+	}
+	for i := 0; i < len(distance); i++ {
+		if distance[i] == math.MaxInt32 {
+			distance[i] = -1
+		}
+	}
+	return distance
+}
+
+// BELLMAN FORD ALGORITHM
+func bellmanford(V int, edges [][]int, SRC int) []int {
+	distance := make([]int, V)
+	for i := 0; i < V; i++ {
+		distance[i] = math.MaxInt32
+	}
+	distance[SRC] = 0
+	for i := 0; i < V-1; i++ {
+		for j := 0; j < len(edges); j++ {
+			u := edges[j][0]
+			v := edges[j][1]
+			weight := edges[j][2]
+			if distance[u] != math.MaxInt32 && distance[v] > weight+distance[u] {
+				distance[v] = distance[u] + weight
+			}
+		}
+	}
+	for i := 0; i < len(edges); i++ {
+		u := edges[i][0]
+		v := edges[i][1]
+		weight := edges[i][2]
+
+		if distance[u] != math.MaxInt32 && distance[v] > distance[u]+weight {
+			var new []int
+			new = append(new, -1)
+			return new
+		}
+	}
+	for i := 0; i < len(distance); i++ {
+		if distance[i] == math.MaxInt32 {
+			distance[i] = -1
+		}
+	}
+	return distance
+}
+
+// FLOYD WARSHALL ALGORHTM
+func floydwarshall(matrix *[][]int) {
+	inf := math.MaxInt32 / 2
+	for i := 0; i < len(*matrix); i++ {
+		for j := 0; j < len(*matrix); j++ {
+			if (*matrix)[i][j] == -1 && i != j {
+				(*matrix)[i][j] = inf
+			}
+		}
+	}
+	for k := 0; k < len(*matrix); k++ {
+		for i := 0; i < len(*matrix); i++ {
+			for j := 0; j < len(*matrix); j++ {
+				if (*matrix)[i][k] != inf && (*matrix)[k][j] != inf {
+					if (*matrix)[i][j] > (*matrix)[i][k]+(*matrix)[k][j] {
+						(*matrix)[i][j] = (*matrix)[i][k] + (*matrix)[k][j]
+					}
+				}
+			}
+		}
+	}
+	for i := 0; i < len(*matrix); i++ {
+		for j := 0; j < len(*matrix); j++ {
+			if (*matrix)[i][j] == inf {
+				(*matrix)[i][j] = -1
+			}
+		}
+	}
+}
+
+// EULER CIRCUIT IN GRAPH
+func dfsfunctionEuler(node int, visited *[]bool, adj [][]int) {
+	(*visited)[node] = true
+	n := len(adj[node])
+
+	for i := 0; i < n; i++ {
+		neighbor := adj[node][i]
+		if (*visited)[neighbor] == false {
+			dfsfunctionEuler(neighbor, visited, adj)
+		}
+	}
+}
+func isEuler(V int, adj [][]int) int {
+	inDegree := make([]int, V)
+	for i := 0; i < V; i++ {
+		n := len(adj[i])
+		for j := 0; j < n; j++ {
+			node := adj[i][j]
+			inDegree[node]++
+		}
+	}
+	odd := 0
+	for i := 0; i < len(inDegree); i++ {
+		if inDegree[i]%2 == 1 {
+			odd++
+		}
+	}
+	if odd != 0 && odd != 2 {
+		return 0
+	}
+	visited := make([]bool, V)
+	for i := 0; i < V; i++ {
+		if visited[i] == false {
+			dfsfunctionEuler(i, &visited, adj)
+			break
+		}
+	}
+	for i := 0; i < V; i++ {
+		if visited[i] == false && inDegree[i] != 0 {
+			return 0
+		}
+	}
+	if odd == 0 {
+		return 2
+	}
+	if odd == 2 {
+		return 1
+	}
+	return 0
 }
