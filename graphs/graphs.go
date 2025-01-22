@@ -575,3 +575,55 @@ func isEuler(V int, adj [][]int) int {
 	}
 	return 0
 }
+
+// COVID SPREAD
+func isValid(x int, y int, matrix [][]int) bool {
+	if x >= 0 && y >= 0 && x < len(matrix) && y < len(matrix[0]) && matrix[x][y] == 1 {
+		return true
+	}
+	return false
+}
+func covidSpread(matrix [][]int) int {
+	rows := [4]int{0, 0, -1, 1}
+	cols := [4]int{1, -1, 0, 0}
+	var q []pair
+	for i := 0; i < len(matrix); i++ {
+		for j := 0; j < len(matrix[i]); j++ {
+			if matrix[i][j] == 2 {
+				q = append(q, pair{i, j})
+			}
+		}
+	}
+	cnt := 0
+	for len(q) > 0 {
+		spread := false
+		n := len(q)
+		for i := 0; i < n; i++ {
+			x := q[0].first
+			y := q[0].second
+			q = q[1:]
+			for j := 0; j < 4; j++ {
+				newX := x + rows[j]
+				newY := y + cols[j]
+
+				if isValid(newX, newY, matrix) == true {
+					matrix[newX][newY] = 2
+					q = append(q, pair{newX, newY})
+					spread = true
+				}
+
+			}
+		}
+		if spread == true {
+			cnt++
+		}
+	}
+	for i := 0; i < len(matrix); i++ {
+		for j := 0; j < len(matrix[i]); j++ {
+			if matrix[i][j] == 2 {
+				return -1
+			}
+		}
+	}
+	return cnt - 1
+}
